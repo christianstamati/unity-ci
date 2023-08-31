@@ -1,0 +1,77 @@
+SAM Medium Post: 
+* https://sam-16930.medium.com/unity-project-structure-a694792cefed
+
+Unity Package Layout:
+* https://docs.unity3d.com/Manual/cus-layout.html
+
+Unity Assembly definition and packages
+* https://docs.unity3d.com/Manual/cus-asmdef.html
+
+
+Overview: 
+* This (empty) file exists only to keep the (otherwise empty) parent folder within the git repo.
+
+Project Layout
+Assets
+├── 3rdParty
+│   └── [CompanyName]
+│       └── [PackageName]
+│           ├── Version.txt (With source URL, changelog)
+│           └── [PackageName]       
+├── Art
+│   ├── Animation
+│   │   ├── AnimationClips 
+│   │   └── Animators
+│   ├── Audio
+│   │   ├── AudioClips
+│   │   └── AudioMixers
+│   ├── Fonts
+│   ├── Materials
+│   ├── Models
+│   ├── PhysicMaterials
+│   ├── Shaders
+│   ├── Sprites
+│   └── Textures
+│   └── Timeline
+│   └── UIToolkit
+│       └── Resources
+│           ├── Layouts
+│           ├── Settings
+│           ├── Styles
+│           └── Themes
+├── Documentation
+├── Prefabs
+│   └── RMC
+│       └── [MyProject]
+│           └── MyHeroPrefab (using MyHero.cs)
+├── Presets
+├── Resources
+├── Scenes
+├── ScriptableObjects
+│   └── RMC
+│       └── [MyProject]
+│           └── MyHeroSettings (using MyHeroSettings.cs)
+├── Scripts
+│   ├── Editor
+│   │   ├── RMC.MyProject.Editor.asmdef
+│   │   └── RMC
+│   │       └── [MyProject] (namespace RMC.MyProject)
+│   │           └── MyHeroEditor.cs 
+│   ├── Runtime
+│   │   ├── RMC.MyProject.Runtime.asmdef
+│   │   └── RMC
+│   │       └── [MyProject] (namespace RMC.MyProject)
+│   │           ├── MyHero.cs 
+│   │           └── MyHeroSettings.cs
+│   └── Tests
+│       ├── Editor
+│       │   ├── RMC.MyProject.Editor.Tests.asmdef
+│       │   └── RMC
+│       │       └── [MyProject] (namespace RMC.MyProject)
+│       │           └── MyHeroTest.cs 
+│       └── Runtime
+│           ├── RMC.MyProject.Runtime.Tests.asmdef
+│           └── RMC 
+│               └── [MyProject] (namespace RMC.MyProject)
+│                   └── MyHeroTest.cs 
+└── Settings
