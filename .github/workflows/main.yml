@@ -9,46 +9,56 @@ env:
   UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
 
 jobs:
-  testAllModes:
+  testRunner:
     name: Test in ${{ matrix.testMode }} ✨
     runs-on: ubuntu-latest
-    container: unityci/editor:ubuntu-2023.1.10f1-linux-il2cpp-2.0.0
     strategy:
       fail-fast: false
       matrix:
-        projectPath:
-          - ./
         testMode:
-          - playmode
-          - editmode
-          - standalone
+          - EditMode
+          - PlayMode
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
-        with:
-          lfs: true
 
-      - name: Cache project
+      - name: Create LFS file list
+        run: git lfs ls-files -l | cut -d' ' -f1 | sort > .lfs-assets-id
+
+      - name: Restore LFS cache
         uses: actions/cache@v3
+        id: lfs-cache
         with:
-          path: ${{ matrix.projectPath }}/Library
-          key: Library-${{ matrix.projectPath }}
+          path: .git/lfs
+          key: ${{ runner.os }}-lfs-${{ hashFiles('.lfs-assets-id') }}
+
+      - name: Git LFS Pull
+        run: |
+          git lfs pull
+          git add .
+          git reset --hard
+
+      - name: Restore Library cache
+        uses: actions/cache@v2
+        with:
+          path: Library
+          key: Library-test-project-${{ matrix.targetPlatform }}
           restore-keys: |
+            Library-test-project-
             Library-
 
       - name: Run tests
-        uses: game-ci/unity-test-runner@v2
-        id: tests
-        env:
-          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+        uses: game-ci/unity-test-runner@v3
+        id: testRunner
         with:
-          projectPath: ${{ matrix.projectPath }}
           testMode: ${{ matrix.testMode }}
-          artifactsPath: ${{ matrix.testMode }}-artifacts
+          checkName: ${{ matrix.testMode }} test results
           githubToken: ${{ secrets.GITHUB_TOKEN }}
-          checkName: ${{ matrix.testMode }} Test Results
-          coverageOptions: 'generateAdditionalMetrics;generateHtmlReport;generateBadgeReport;assemblyFilters:+my.assembly.*'
 
+      - uses: actions/upload-artifact@v2
+        with:
+          name: Test results (${{ matrix.testMode }})
+          path: ${{ steps.testRunner.outputs.artifactsPath }}
 
       - uses: actions/upload-artifact@v3
         if: always()
