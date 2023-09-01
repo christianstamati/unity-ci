@@ -11,7 +11,7 @@ Unity Assembly definition and packages
 Overview: 
 * This (empty) file exists only to keep the (otherwise empty) parent folder within the git repo.
 
-Project Layout
+Project Layout:
 Assets
 ├── 3rdParty
 │   └── [CompanyName]
