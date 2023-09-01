@@ -1,6 +1,5 @@
 name: Unity Actions 🎮
 
-# how can i fire the workflow
 on:
   pull_request: { }
   push: { branches: [main] }
