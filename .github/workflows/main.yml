@@ -12,6 +12,7 @@ jobs:
   testAllModes:
     name: Test in ${{ matrix.testMode }} ✨
     runs-on: ubuntu-latest
+    container: unityci/editor:ubuntu-2023.1.10f1-linux-il2cpp-2.0.0
     strategy:
       fail-fast: false
       matrix:
