@@ -9,57 +9,39 @@ env:
   UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
 
 jobs:
-  testRunner:
+  testAllModes:
     name: Test in ${{ matrix.testMode }} ✨
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
+        projectPath:
+          - ./
         testMode:
-          - EditMode
-          - PlayMode
+          - playmode
+          - editmode
+          - standalone
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-
-      - name: Create LFS file list
-        run: git lfs ls-files -l | cut -d' ' -f1 | sort > .lfs-assets-id
-
-      - name: Restore LFS cache
-        uses: actions/cache@v3
-        id: lfs-cache
+      - uses: actions/checkout@v3
         with:
-          path: .git/lfs
-          key: ${{ runner.os }}-lfs-${{ hashFiles('.lfs-assets-id') }}
-
-      - name: Git LFS Pull
-        run: |
-          git lfs pull
-          git add .
-          git reset --hard
-
-      - name: Restore Library cache
-        uses: actions/cache@v3
+          lfs: true
+      - uses: actions/cache@v3
         with:
-          path: Library
-          key: Library-test-project-${{ matrix.targetPlatform }}
+          path: ${{ matrix.projectPath }}/Library
+          key: Library-${{ matrix.projectPath }}
           restore-keys: |
-            Library-test-project-
             Library-
-
-      - name: Run tests
-        uses: game-ci/unity-test-runner@v3
-        id: testRunner
+      - uses: game-ci/unity-test-runner@v3
+        id: tests
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
         with:
+          projectPath: ${{ matrix.projectPath }}
           testMode: ${{ matrix.testMode }}
-          checkName: ${{ matrix.testMode }} test results
+          artifactsPath: ${{ matrix.testMode }}-artifacts
           githubToken: ${{ secrets.GITHUB_TOKEN }}
-
-      - uses: actions/upload-artifact@v3
-        with:
-          name: Test results (${{ matrix.testMode }})
-          path: ${{ steps.testRunner.outputs.artifactsPath }}
-
+          checkName: ${{ matrix.testMode }} Test Results
+          coverageOptions: 'generateAdditionalMetrics;generateHtmlReport;generateBadgeReport;assemblyFilters:+my.assembly.*'
       - uses: actions/upload-artifact@v3
         if: always()
         with:
@@ -70,8 +52,7 @@ jobs:
         with:
           name: Coverage results for ${{ matrix.testMode }}
           path: ${{ steps.tests.outputs.coveragePath }}
-          
-    
+
 
 #  buildWebGL:
 #    needs: testRunner
