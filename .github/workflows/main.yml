@@ -4,9 +4,6 @@ on:
   pull_request: { }
   push: { branches: [main] }
   workflow_dispatch: { }
-    
-env:
-  UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
   
 jobs:
   buildWindows:
@@ -30,6 +27,8 @@ jobs:
 
       - name: Run Builder
         uses: game-ci/unity-builder@v3
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
         with:
           targetPlatform: StandaloneWindows64
 
