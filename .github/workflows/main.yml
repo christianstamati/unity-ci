@@ -66,12 +66,7 @@ jobs:
       fail-fast: false
       matrix:
         targetPlatform:
-          - StandaloneOSX
           - StandaloneWindows64
-          - StandaloneLinux64
-          - iOS
-          - Android
-          - WebGL 
     steps:
       - name: Checkout project files
         uses: actions/checkout@v3
@@ -89,7 +84,7 @@ jobs:
       - if: matrix.targetPlatform == 'Android'
         uses: jlumbroso/free-disk-space@v1.2.0
 
-      - name: Run Tests
+      - name: Run Builder
         uses: game-ci/unity-builder@v3
         env:
           UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
