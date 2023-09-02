@@ -4,8 +4,74 @@ on:
   pull_request: { }
   push: { branches: [main] }
   workflow_dispatch: { }
+    
+env:
+  UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
   
 jobs:
+  buildWindows:
+    name: Build for StandaloneWindows64
+    runs-on: windows-latest
+    strategy:
+      fail-fast: false
+    steps:
+      - name: Checkout project files
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          lfs: true
+
+      - name: Restore Cache
+        uses: actions/cache@v3
+        with:
+          path: Library
+          key: Library-StandaloneWindows64
+          restore-keys: Library-
+
+      - name: Run Builder
+        uses: game-ci/unity-builder@v3
+        with:
+          targetPlatform: StandaloneWindows64
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: build-StandaloneWindows64
+          path: build/StandaloneWindows64
+
+#  buildAndroid:
+#    name: Build for Android
+#    runs-on: ubuntu-latest
+#    strategy:
+#      fail-fast: false
+#    steps:
+#      - name: Checkout project files
+#        uses: actions/checkout@v3
+#        with:
+#          fetch-depth: 0
+#          lfs: true
+#
+#      - name: Restore Cache
+#        uses: actions/cache@v3
+#        with:
+#          path: Library
+#          key: Library-Android
+#          restore-keys: Library-
+#
+#      - name: Free disk space
+#        uses: jlumbroso/free-disk-space@v1.2.0
+#
+#      - name: Run Builder
+#        uses: game-ci/unity-builder@v3
+#        with:
+#          targetPlatform: Android
+#
+#      - name: Upload build artifacts
+#        uses: actions/upload-artifact@v3
+#        with:
+#          name: build-Android
+#          path: build/Android
+            
 #  testAllModes:
 #    name: Test in ${{ matrix.testMode }} ✨
 #    runs-on: ubuntu-latest
@@ -59,40 +125,44 @@ jobs:
 #          name: Coverage results for ${{ matrix.testMode }}
 #          path: ${{ steps.tests.outputs.coveragePath }}
                  
-  buildForAllSupportedPlatforms:
-    name: Build for ${{ matrix.targetPlatform }}
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        targetPlatform:
-          - StandaloneWindows64
-    steps:
-      - name: Checkout project files
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-          lfs: true
-
-      - name: Restore Cache
-        uses: actions/cache@v3
-        with:
-          path: Library
-          key: Library-${{ matrix.targetPlatform }}
-          restore-keys: Library-
+#  buildForAllSupportedPlatforms:
+#    name: Build for ${{ matrix.targetPlatform }}
+#    runs-on: ubuntu-latest
+#    container: unityci/editor:ubuntu-2023.1.10f1-linux-il2cpp-2.0.0
+#    strategy:
+#      fail-fast: false
+#      matrix:
+#        targetPlatform:
+#          - StandaloneWindows64
+#          - Android
+#    steps:
+#      - name: Checkout project files
+#        uses: actions/checkout@v3
+#        with:
+#          fetch-depth: 0
+#          lfs: true
+#
+#      - name: Restore Cache
+#        uses: actions/cache@v3
+#        with:
+#          path: Library
+#          key: Library-${{ matrix.targetPlatform }}
+#          restore-keys: Library-
+#
+#      - if: matrix.targetPlatform == 'Android'
+#        uses: jlumbroso/free-disk-space@v1.2.0
+#
+#      - name: Run Builder
+#        uses: game-ci/unity-builder@v3
+#        env:
+#          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+#        with:
+#          targetPlatform: ${{ matrix.targetPlatform }}
+#
+#      - name: Uploads build artifacts
+#        uses: actions/upload-artifact@v3
+#        with:
+#          name: build-${{ matrix.targetPlatform }}
+#          path: build/${{ matrix.targetPlatform }}
           
-      - if: matrix.targetPlatform == 'Android'
-        uses: jlumbroso/free-disk-space@v1.2.0
 
-      - name: Run Builder
-        uses: game-ci/unity-builder@v3
-        env:
-          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
-        with:
-          targetPlatform: ${{ matrix.targetPlatform }}
-    
-      - name: Uploads build artifacts
-        uses: actions/upload-artifact@v3
-        with:
-          name: build-${{ matrix.targetPlatform }}
-          path: build/${{ matrix.targetPlatform }}
