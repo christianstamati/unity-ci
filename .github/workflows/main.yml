@@ -13,7 +13,7 @@ env:
 jobs:
   buildWindows:
     name: Build for StandaloneWindows64
-    runs-on: windows-latest
+    runs-on: windows-2019
     strategy:
       fail-fast: false
     steps:
