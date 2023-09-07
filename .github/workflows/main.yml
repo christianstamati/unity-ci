@@ -5,74 +5,63 @@ on:
   push: { branches: [main] }
   workflow_dispatch: { }
   
-env:
-  UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
-  UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
-  UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
-  
 jobs:
-  buildWindows:
-    name: Build for StandaloneWindows64
-    runs-on: windows-2019
+  buildWithLinux:
+    name: Build for ${{ matrix.targetPlatform }}
+    runs-on: ubuntu-latest
     strategy:
       fail-fast: false
+      matrix:
+        targetPlatform:
+          - Android
+          - iOS
+          - StandaloneLinux64
+          - WebGL 
+    outputs:
+      buildVersion: ${{ steps.build.outputs.buildVersion }}    
     steps:
-      - name: Checkout project files
+      - name: Checkout Repository
         uses: actions/checkout@v3
         with:
-          fetch-depth: 0
-          lfs: true
-
-      - name: Restore Cache
+          fetch-depth: 0         
+      - name: Create LFS file list
+        run: git lfs ls-files -l | cut -d' ' -f1 | sort > .lfs-assets-id
+      - name: Restore LFS cache
+        uses: actions/cache@v3
+        id: lfs-cache
+        with:
+          path: .git/lfs
+          key: ${{ runner.os }}-lfs-${{ hashFiles('.lfs-assets-id') }}
+      - name: Git LFS Pull
+        run: |
+          git lfs pull
+          git add .
+          git reset --hard 
+      - name: Cache Library
         uses: actions/cache@v3
         with:
           path: Library
-          key: Library-StandaloneWindows64
-          restore-keys: Library-
-
-      - name: Run Builder
-        uses: game-ci/unity-builder@v3
+          key: Library-build-${{ matrix.targetPlatform }}-${{ hashFiles('Assets/**', 'Packages/**', 'ProjectSettings/**') }}
+          restore-keys: Library-build-${{ matrix.targetPlatform }}-
+      - name: Free Disk Space for Android
+        if: matrix.targetPlatform == 'Android'
+        uses: jlumbroso/free-disk-space@v1.2.0
         with:
-          targetPlatform: StandaloneWindows64
-
-      - name: Upload build artifacts
+          large-packages: false
+      - name: Build Unity Project
+        id: build
+        uses: game-ci/unity-builder@main
+        env:
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+        with:
+          targetPlatform: ${{ matrix.targetPlatform }}
+      - name: Upload Build
         uses: actions/upload-artifact@v3
+        if: github.event.action == 'published' || contains(github.event.inputs.workflow_mode, matrix.targetPlatform) || (contains(github.event.inputs.workflow_mode, 'Steam') && matrix.targetPlatform == 'StandaloneLinux64')
         with:
-          name: build-StandaloneWindows64
-          path: build/StandaloneWindows64
-
-#  buildAndroid:
-#    name: Build for Android
-#    runs-on: ubuntu-latest
-#    strategy:
-#      fail-fast: false
-#    steps:
-#      - name: Checkout project files
-#        uses: actions/checkout@v3
-#        with:
-#          fetch-depth: 0
-#          lfs: true
-#
-#      - name: Restore Cache
-#        uses: actions/cache@v3
-#        with:
-#          path: Library
-#          key: Library-Android
-#          restore-keys: Library-
-#
-#      - name: Free disk space
-#        uses: jlumbroso/free-disk-space@v1.2.0
-#
-#      - name: Run Builder
-#        uses: game-ci/unity-builder@v3
-#        with:
-#          targetPlatform: Android
-#
-#      - name: Upload build artifacts
-#        uses: actions/upload-artifact@v3
-#        with:
-#          name: build-Android
-#          path: build/Android
+          name: cgs-${{ matrix.targetPlatform }}
+          path: build/${{ matrix.targetPlatform }}
             
 #  testAllModes:
 #    name: Test in ${{ matrix.testMode }} ✨
