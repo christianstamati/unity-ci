@@ -60,9 +60,8 @@ jobs:
           targetPlatform: ${{ matrix.targetPlatform }}
       - name: Upload Build
         uses: actions/upload-artifact@v3
-        if: github.event.action == 'published' || contains(github.event.inputs.workflow_mode, matrix.targetPlatform) || (contains(github.event.inputs.workflow_mode, 'Steam') && matrix.targetPlatform == 'StandaloneLinux64')
         with:
-          name: cgs-${{ matrix.targetPlatform }}
+          name: chs-${{ matrix.targetPlatform }}
           path: build/${{ matrix.targetPlatform }}
             
 #  testAllModes:
