@@ -7,26 +7,22 @@ on:
 
   
 jobs:
-  buildWithLinux:
-    name: Build for ${{ matrix.targetPlatform }}
+  tests:
+    name: Test in ${{ matrix.testMode }} ✨
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        targetPlatform:
-          - Android
-          - iOS
-          - StandaloneLinux64
-          - WebGL 
-    outputs:
-      buildVersion: ${{ steps.build.outputs.buildVersion }}    
+        testMode:
+          - playmode
+          - editmode
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
         with:
-          fetch-depth: 0         
+          fetch-depth: 0
       - name: Create LFS file list
-        run: git lfs ls-files -l | cut -d' ' -f1 | sort > .lfs-assets-id
+        run: git lfs ls-files -l | cut -d' ' -f1 | sort > .lfs-assets-id        
       - name: Restore LFS cache
         uses: actions/cache@v3
         id: lfs-cache
@@ -37,85 +33,90 @@ jobs:
         run: |
           git lfs pull
           git add .
-          git reset --hard 
+          git reset --hard
       - name: Cache Library
         uses: actions/cache@v3
         with:
           path: Library
-          key: Library-build-${{ matrix.targetPlatform }}-${{ hashFiles('Assets/**', 'Packages/**', 'ProjectSettings/**') }}
-          restore-keys: Library-build-${{ matrix.targetPlatform }}-
-      - name: Free Disk Space for Android
-        if: matrix.targetPlatform == 'Android'
-        uses: jlumbroso/free-disk-space@v1.2.0
-        with:
-          large-packages: false
-      - name: Build Unity Project
-        id: build
-        uses: game-ci/unity-builder@main
+          key: Library-test-${{ hashFiles('Assets/**', 'Packages/**', 'ProjectSettings/**') }}
+          restore-keys: Library-test-
+      - name: Run Tests
+        uses: game-ci/unity-test-runner@main
+        id: tests
         env:
-          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
           UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
           UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
         with:
-          targetPlatform: ${{ matrix.targetPlatform }}
-      - name: Upload Build
+          testMode: ${{ matrix.testMode }}
+          artifactsPath: ${{ matrix.testMode }}-artifacts
+          githubToken: ${{ secrets.GITHUB_TOKEN }}
+          checkName: ${{ matrix.testMode }} test results
+          coverageOptions: 'generateAdditionalMetrics;generateHtmlReport;generateBadgeReport;assemblyFilters:+my.assembly.*'
+      - name: Uploads test artifacts
         uses: actions/upload-artifact@v3
         with:
-          name: chs-${{ matrix.targetPlatform }}
-          path: build/${{ matrix.targetPlatform }}
-            
-#  testAllModes:
-#    name: Test in ${{ matrix.testMode }} ✨
+          name: Test results for ${{ matrix.testMode }}
+          path: ${{ steps.tests.outputs.artifactsPath }}
+  
+#  buildWithLinux:
+#    name: Build for ${{ matrix.targetPlatform }}
 #    runs-on: ubuntu-latest
 #    strategy:
 #      fail-fast: false
 #      matrix:
-#        projectPath:
-#          - ./
-#        testMode:
-#          - playmode
-#          - editmode
+#        targetPlatform:
+#          - Android
+#          - iOS
+#          - StandaloneLinux64
+#          - WebGL 
+#    outputs:
+#      buildVersion: ${{ steps.build.outputs.buildVersion }}    
 #    steps:
-#      - name: Checkout project files
+#      - name: Checkout Repository
 #        uses: actions/checkout@v3
 #        with:
-#          lfs: true
-#
-#      - name: Restore Cache 
+#          fetch-depth: 0         
+#      - name: Create LFS file list
+#        run: git lfs ls-files -l | cut -d' ' -f1 | sort > .lfs-assets-id
+#      - name: Restore LFS cache
+#        uses: actions/cache@v3
+#        id: lfs-cache
+#        with:
+#          path: .git/lfs
+#          key: ${{ runner.os }}-lfs-${{ hashFiles('.lfs-assets-id') }}
+#      - name: Git LFS Pull
+#        run: |
+#          git lfs pull
+#          git add .
+#          git reset --hard 
+#      - name: Cache Library
 #        uses: actions/cache@v3
 #        with:
-#          path: ${{ matrix.projectPath }}/Library
-#          key: Library-${{ matrix.projectPath }}
-#          restore-keys: |
-#            Library-
-#
-#      - name: Run Tests 
-#        uses: game-ci/unity-test-runner@v3
-#        id: tests
+#          path: Library
+#          key: Library-build-${{ matrix.targetPlatform }}-${{ hashFiles('Assets/**', 'Packages/**', 'ProjectSettings/**') }}
+#          restore-keys: Library-build-${{ matrix.targetPlatform }}-
+#      - name: Free Disk Space for Android
+#        if: matrix.targetPlatform == 'Android'
+#        uses: jlumbroso/free-disk-space@v1.2.0
+#        with:
+#          large-packages: false
+#      - name: Build Unity Project
+#        id: build
+#        uses: game-ci/unity-builder@main
 #        env:
 #          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+#          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+#          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
 #        with:
-#          projectPath: ${{ matrix.projectPath }}
-#          testMode: ${{ matrix.testMode }}
-#          artifactsPath: ${{ matrix.testMode }}-artifacts
-#          githubToken: ${{ secrets.GITHUB_TOKEN }}
-#          checkName: ${{ matrix.testMode }} test results
-#          coverageOptions: 'generateAdditionalMetrics;generateHtmlReport;generateBadgeReport;assemblyFilters:+my.assembly.*'
-#
-#      - name: Uploads test artifacts  
+#          targetPlatform: ${{ matrix.targetPlatform }}
+#      - name: Upload Build
 #        uses: actions/upload-artifact@v3
-#        if: always()
 #        with:
-#          name: Test results for ${{ matrix.testMode }}
-#          path: ${{ steps.tests.outputs.artifactsPath }}
-#
-#      # Disabled
-#      - name: Uploads coverage artifacts      
-#        uses: actions/upload-artifact@v3
-#        if: false
-#        with:
-#          name: Coverage results for ${{ matrix.testMode }}
-#          path: ${{ steps.tests.outputs.coveragePath }}
+#          name: build-${{ matrix.targetPlatform }}
+#          path: build/${{ matrix.targetPlatform }}
+            
+
                  
 #  buildForAllSupportedPlatforms:
 #    name: Build for ${{ matrix.targetPlatform }}
