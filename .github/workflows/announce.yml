@@ -1,0 +1,16 @@
+﻿name: Announce 📢
+
+on:
+  workflow_dispatch: {}
+  
+jobs:
+  announceReleaseToSocialMedia:
+    name: Announce Release to Social Media
+    runs-on: ubuntu-latest
+    steps:
+      - name: Discord Announcement
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+        uses: Ilshidur/action-discord@0.3.2
+        with:
+          args: "Hello, beautiful ! I ran a GitHub Actions for you <3"
