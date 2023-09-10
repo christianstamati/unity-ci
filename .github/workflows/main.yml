@@ -1,4 +1,4 @@
-name: Development 🎮
+name: Test, Build and Deploy 🎮
 
 on:
   pull_request: { }
@@ -8,7 +8,7 @@ on:
   
 jobs:
   tests:
-    name: Test in ${{ matrix.testMode }} 📝
+    name: Test in ${{ matrix.testMode }} ✨
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -22,24 +22,24 @@ jobs:
         with:
           fetch-depth: 0
       - name: Create LFS file list
-        run: git lfs ls-files -l | cut -d' ' -f1 | sort > .lfs-assets-id        
+        run: git lfs ls-files -l | cut -d' ' -f1 | sort > .lfs-assets-id
       - name: Restore LFS cache
         uses: actions/cache@v3
         id: lfs-cache
         with:
           path: .git/lfs
-          key: ${{ runner.os }}-lfs-${{ hashFiles('.lfs-assets-id') }}          
+          key: ${{ runner.os }}-lfs-${{ hashFiles('.lfs-assets-id') }}
       - name: Git LFS Pull
         run: |
           git lfs pull
           git add .
-          git reset --hard          
+          git reset --hard
       - name: Cache Library
         uses: actions/cache@v3
         with:
           path: Library
           key: Library-test-${{ hashFiles('Assets/**', 'Packages/**', 'ProjectSettings/**') }}
-          restore-keys: Library-test-      
+          restore-keys: Library-test-
       - name: Run Tests
         uses: game-ci/unity-test-runner@main
         id: tests
