@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.UIElements;
 
-namespace CHS.UnityCI
+namespace CH.UnityCI
 {
     public class UICounter : MonoBehaviour
     {

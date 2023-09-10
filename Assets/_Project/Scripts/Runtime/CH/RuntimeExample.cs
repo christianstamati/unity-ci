@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace CHS.UnityCI
+namespace CH.UnityCI
 {
     public class RuntimeExample : MonoBehaviour
     {

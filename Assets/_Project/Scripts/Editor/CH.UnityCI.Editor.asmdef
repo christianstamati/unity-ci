@@ -1,6 +1,6 @@
 {
-    "name": "CHS.UnityCI.Editor",
-    "rootNamespace": "CHS.UnityCI",
+    "name": "CH.UnityCI.Editor",
+    "rootNamespace": "CH.UnityCI",
     "references": [
         "GUID:ba058edd73a5cfd44bce194e5985cd99"
     ],

@@ -2,7 +2,7 @@ using System.Collections;
 using NUnit.Framework;
 using UnityEngine.TestTools;
 
-namespace CHS.UnityCI
+namespace CH.UnityCI
 {
     public class RuntimeExampleTests
     {

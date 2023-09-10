@@ -1,15 +1,12 @@
 {
-    "name": "CHS.UnityCI.Editor.Tests",
-    "rootNamespace": "CHS.UnityCI",
+    "name": "CH.UnityCI.Runtime.Tests",
+    "rootNamespace": "CH.UnityCI",
     "references": [
         "UnityEngine.TestRunner",
         "UnityEditor.TestRunner",
-        "CHS.UnityCI.Editor",
-        "CHS.UnityCI.Runtime"
+        "CH.UnityCI.Runtime"
     ],
-    "includePlatforms": [
-        "Editor"
-    ],
+    "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
     "overrideReferences": true,

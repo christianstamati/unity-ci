@@ -1,6 +1,6 @@
 {
-    "name": "CHS.UnityCI.Runtime",
-    "rootNamespace": "CHS.UnityCI",
+    "name": "CH.UnityCI.Runtime",
+    "rootNamespace": "CH.UnityCI",
     "references": [],
     "includePlatforms": [],
     "excludePlatforms": [],
