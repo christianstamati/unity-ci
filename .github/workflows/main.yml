@@ -83,6 +83,7 @@ jobs:
           UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
           UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
         with:
+          allowDirtyBuild: true
           targetPlatform: ${{ matrix.targetPlatform }}
       - name: Sleep for Retry
         if: ${{ steps.build.outcome == 'failure' }}
@@ -98,6 +99,7 @@ jobs:
           UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
           UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
         with:
+          allowDirtyBuild: true
           targetPlatform: ${{ matrix.targetPlatform }}
       - name: Sleep for Retry 2
         if: ${{ steps.build.outcome == 'failure' && steps.build-2.outcome == 'failure' }}
@@ -112,6 +114,7 @@ jobs:
           UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
           UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
         with:
+          allowDirtyBuild: true
           targetPlatform: ${{ matrix.targetPlatform }}
       - name: Upload Build
         uses: actions/upload-artifact@v3
