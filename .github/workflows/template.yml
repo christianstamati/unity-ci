@@ -15,7 +15,7 @@ jobs:
           - editmode
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v3
         with:
           fetch-depth: 0
       - name: Create LFS file list
@@ -72,7 +72,7 @@ jobs:
       buildVersion: ${{ steps.build.outputs.buildVersion }}    
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v3
         with:
           fetch-depth: 0         
       - name: Create LFS file list
@@ -161,11 +161,11 @@ jobs:
         with:
           name: build-StandaloneOSX
           path: build/StandaloneOSX
+        
           
   buildWithWindows:
     name: Build for ${{ matrix.targetPlatform }}
     runs-on: windows-2019
-    needs: [tests, buildWithLinux, buildWithMac]
     outputs:
       buildVersion: ${{ steps.build.outputs.buildVersion }}
     strategy:
@@ -174,10 +174,9 @@ jobs:
         targetPlatform:
           - StandaloneWindows
           - StandaloneWindows64
-    timeout-minutes: 90
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v3
         with:
           fetch-depth: 0
       - name: Create LFS file list
@@ -201,7 +200,6 @@ jobs:
           restore-keys: |
             Library-buildWindows-${{ matrix.targetPlatform }}-
             Library-buildWindows-
-        # First Build    
       - name: Build Unity Project
         id: build
         continue-on-error: true
@@ -212,12 +210,12 @@ jobs:
           UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
           UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
         with:
+          allowDirtyBuild: true
           targetPlatform: ${{ matrix.targetPlatform }}
       - name: Sleep for Retry
         if: ${{ steps.build.outcome == 'failure' }}
         run: Start-Sleep -s 120
-        # Retry 2
-      - name: Build Unity Project (Retry 1)
+      - name: Build Retry
         id: build-2
         continue-on-error: true
         timeout-minutes: 45
@@ -228,12 +226,12 @@ jobs:
           UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
           UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
         with:
+          allowDirtyBuild: true
           targetPlatform: ${{ matrix.targetPlatform }}
       - name: Sleep for Retry 2
         if: ${{ steps.build.outcome == 'failure' && steps.build-2.outcome == 'failure' }}
         run: Start-Sleep -s 240
-        # Retry 3
-      - name: Build Unity Project (Retry 2)
+      - name: Build Retry 2
         id: build-3
         timeout-minutes: 45
         if: ${{ steps.build.outcome == 'failure' && steps.build-2.outcome == 'failure' }}
@@ -243,6 +241,7 @@ jobs:
           UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
           UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
         with:
+          allowDirtyBuild: true
           targetPlatform: ${{ matrix.targetPlatform }}
       - name: Upload Build
         uses: actions/upload-artifact@v3
